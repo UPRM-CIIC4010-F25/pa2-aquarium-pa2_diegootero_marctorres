@@ -14,10 +14,17 @@ enum class AquariumCreatureType {
 
 string AquariumCreatureTypeToString(AquariumCreatureType t);
 
-struct AquariumLevelPopulationNode{
-    AquariumCreatureType creatureType;
-    int population;
-    int currentPopulation;
+class AquariumLevelPopulationNode{
+    public:
+        AquariumLevelPopulationNode() = default;
+        AquariumLevelPopulationNode(AquariumCreatureType creature_type, int population) {
+            this->creatureType = creature_type;
+            this->population = population;
+            this->currentPopulation = 0;
+        };
+        AquariumCreatureType creatureType;
+        int population;
+        int currentPopulation;
 };
 
 class AquariumLevel : public GameLevel {

@@ -199,7 +199,7 @@ void Aquarium::clearCreatures() {
 }
 
 std::shared_ptr<Creature> Aquarium::getCreatureAt(int index) {
-    if (index < 0 || index >= m_creatures.size()) {
+    if (index < 0 || size_t(index) >= m_creatures.size()) {
         return nullptr;
     }
     return m_creatures[index];
