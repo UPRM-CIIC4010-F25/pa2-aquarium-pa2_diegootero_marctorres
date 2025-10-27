@@ -53,6 +53,14 @@ void ofApp::setup(){
         std::make_shared<GameSprite>("game-over.png", ofGetWindowWidth(), ofGetWindowHeight())
     ));
 
+    // Background ambience
+    if (!ambient.load("audio/ambient.mp3"))
+        ofLogError() << "Failed to load ambient.mp3!";
+    ambient.setLoop(true);
+    ambient.setMultiPlay(false);
+    ambient.setVolume(0.45f);
+    ambient.play();
+
     ofSetLogLevel(OF_LOG_NOTICE); // Set default log level
 }
 
