@@ -202,6 +202,7 @@ class GameOverScene : public GameScene {
 
 class GameSceneManager {
     public:
+    
         void Transition(string name);
         void AddScene(std::shared_ptr<GameScene> newScene);
         bool HasScenes(){return m_scenes.size() > 0; }
