@@ -450,7 +450,7 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
                 float dx = segments[s].position.x - player->getX();
                 float dy = segments[s].position.y - player->getY();
                 float distanceSq = dx * dx + dy * dy;
-                float collisionRadius = (s == 0) ? 20.0f : (s == segments.size() - 1) ? 15.0f : 12.0f;
+                float collisionRadius = (s == 0) ? 35.0f : (s == segments.size() - 1) ? 15.0f : 12.0f;
                 if (distanceSq < collisionRadius * collisionRadius) {
                     return std::make_shared<GameEvent>(GameEventType::COLLISION, player, predator);
                 }
