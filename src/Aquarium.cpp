@@ -444,9 +444,6 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
     
     for (int i = 0; i < aquarium->getCreatureCount(); ++i) {
         std::shared_ptr<Creature> npc = aquarium->getCreatureAt(i);
-        if (npc && checkCollision(player, npc)) {
-            return std::make_shared<GameEvent>(GameEventType::COLLISION, player, npc);
-        }
         if (auto predator = std::dynamic_pointer_cast<Predator>(npc)) {
             std::vector<Predator::Segment> segments = predator->getSegments();
             for (size_t s = 0; s < segments.size(); ++s) {
@@ -457,6 +454,11 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
                 if (distanceSq < collisionRadius * collisionRadius) {
                     return std::make_shared<GameEvent>(GameEventType::COLLISION, player, predator);
                 }
+            }
+        }
+        else {
+            if (npc && checkCollision(player, npc)) {
+                return std::make_shared<GameEvent>(GameEventType::COLLISION, player, npc);
             }
         }
     }
