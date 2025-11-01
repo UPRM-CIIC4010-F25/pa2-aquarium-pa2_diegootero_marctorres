@@ -384,6 +384,8 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
     int x = rand() % this->getWidth();
     int y = rand() % this->getHeight();
     int speed = 1 + rand() % 25; // Speed between 1 and 25
+    int predatorSpeed = 10;
+    int babyPredatorSpeed = 9 + rand() % 3; // Speed between 9 and 12
 
     switch (type) {
         case AquariumCreatureType::NPCreature:
@@ -394,10 +396,17 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             break;
         case AquariumCreatureType::Crab:
             this->addCreature(std::make_shared<Crab>(x, this->getHeight(), speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Crab)));
+            break;
         case AquariumCreatureType::Predator:
-            this->addCreature(std::make_shared<Predator>(x, 0, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Predator),
+            this->addCreature(std::make_shared<Predator>(x, 0, predatorSpeed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Predator),
                                                         this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorBody),
-                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorTail)));
+                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorTail), 10));
+            break;
+        case AquariumCreatureType::BabyPredator:
+            this->addCreature(std::make_shared<Predator>(x, 0, babyPredatorSpeed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Predator),
+                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorBody),
+                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorTail), 4));
+            break;                                             
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
@@ -596,6 +605,49 @@ std::vector<AquariumCreatureType> Level_1::Repopulate() {
 }
 
 std::vector<AquariumCreatureType> Level_2::Repopulate() {
+    std::vector<AquariumCreatureType> toRepopulate;
+    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+        int delta = node->population - node->currentPopulation;
+        if(delta >0){
+            for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+
+std::vector<AquariumCreatureType> Level_3::Repopulate() {
+    std::vector<AquariumCreatureType> toRepopulate;
+    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+        int delta = node->population - node->currentPopulation;
+        if(delta >0){
+            for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+
+std::vector<AquariumCreatureType> Level_4::Repopulate() {
+    std::vector<AquariumCreatureType> toRepopulate;
+    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+        int delta = node->population - node->currentPopulation;
+        if(delta >0){
+            for(int i=0; i<delta; i++){
+                toRepopulate.push_back(node->creatureType);
+            }
+            node->currentPopulation += delta;
+        }
+    }
+    return toRepopulate;
+}
+
+
+std::vector<AquariumCreatureType> Level_5::Repopulate() {
     std::vector<AquariumCreatureType> toRepopulate;
     for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
         int delta = node->population - node->currentPopulation;
