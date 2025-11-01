@@ -17,6 +17,12 @@ enum class AquariumCreatureType {
     Crab
 };
 
+enum class PlayerType {
+    Pirahna,
+    Shark,
+    Whale
+};
+
 string AquariumCreatureTypeToString(AquariumCreatureType t);
 
 class AquariumLevelPopulationNode{
@@ -62,6 +68,7 @@ public:
     float getDx() { return m_dx; }
     float getDy() { return m_dy; }
     void setDirection(float dx, float dy);
+    void setSprite(std::shared_ptr<GameSprite> new_sprite) { m_sprite = new_sprite; };
 
     int getScore()const { return m_score; }
     int getLives() const { return m_lives; }
@@ -141,7 +148,12 @@ class AquariumSpriteManager {
         AquariumSpriteManager();
         ~AquariumSpriteManager() = default;
         std::shared_ptr<GameSprite>GetSprite(AquariumCreatureType t);
+        std::shared_ptr<GameSprite>GetPlayerSprite(PlayerType t);
     private:
+        std::shared_ptr<GameSprite> m_player_fish;
+        std::shared_ptr<GameSprite> m_bigplayer_fish;
+        std::shared_ptr<GameSprite> m_biggerplayer_fish;
+
         std::shared_ptr<GameSprite> m_npc_fish;
         std::shared_ptr<GameSprite> m_big_fish;
         std::shared_ptr<GameSprite> m_crab_fish;
@@ -164,9 +176,10 @@ public:
     void setMaxPopulation(int n) { m_maxPopulation = n; }
     void Repopulate();
     void SpawnCreature(AquariumCreatureType type);
-    
+    std::shared_ptr<AquariumSpriteManager> getSpriteManager() { return m_sprite_manager; }
     std::shared_ptr<Creature> getCreatureAt(int index);
     int getCreatureCount() const { return m_creatures.size(); }
+
     int getWidth() const { return m_width; }
     int getHeight() const { return m_height; }
 

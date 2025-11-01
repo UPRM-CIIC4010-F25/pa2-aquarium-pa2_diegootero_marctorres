@@ -295,6 +295,10 @@ void Predator::move() {
 
 // AquariumSpriteManager
 AquariumSpriteManager::AquariumSpriteManager(){
+    this->m_player_fish = std::make_shared<GameSprite>("player1.png", 40,40);
+    this->m_bigplayer_fish = std::make_shared<GameSprite>("player2.png", 40,40);
+    this->m_biggerplayer_fish = std::make_shared<GameSprite>("player3.png", 100,100);
+
     this->m_npc_fish = std::make_shared<GameSprite>("base-fish.png", 70,70);
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
     this->m_crab_fish = std::make_shared<GameSprite>("crab.png", 50, 50);
@@ -307,7 +311,6 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
     switch(t){
         case AquariumCreatureType::BiggerFish:
             return std::make_shared<GameSprite>(*this->m_big_fish);
-            
         case AquariumCreatureType::NPCreature:
             return std::make_shared<GameSprite>(*this->m_npc_fish);
         case AquariumCreatureType::Crab:
@@ -323,6 +326,16 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
     }
 }
 
+std::shared_ptr<GameSprite> AquariumSpriteManager::GetPlayerSprite(PlayerType t) {
+    switch (t){
+        case PlayerType::Pirahna:
+            return std::make_shared<GameSprite>(*this->m_player_fish);
+        case PlayerType::Shark:
+            return std::make_shared<GameSprite>(*this->m_bigplayer_fish);
+        case PlayerType::Whale:
+            return std::make_shared<GameSprite>(*this->m_biggerplayer_fish);
+    }
+}
 
 // Aquarium Implementation
 Aquarium::Aquarium(int width, int height, std::shared_ptr<AquariumSpriteManager> spriteManager)
@@ -509,6 +522,13 @@ void AquariumGameScene::Update(){
                     this->m_player->addToScore(1, event->creatureB->getValue());
                     if (this->m_player->getScore() % 25 == 0){
                         this->m_player->increasePower(1);
+                        if (this->m_player->getPower() == 5) {
+                            this->m_player->setSprite(m_aquarium->getSpriteManager()->GetPlayerSprite(PlayerType::Shark));
+                            
+                        }
+                        else if (this->m_player->getPower() == 10) {
+                            this->m_player->setSprite(m_aquarium->getSpriteManager()->GetPlayerSprite(PlayerType::Whale));
+                        }
                         ofLogNotice() << "Player power increased to " << this->m_player->getPower() << "!" << std::endl;
                     }
                     
