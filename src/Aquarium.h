@@ -83,9 +83,12 @@ public:
     AquariumCreatureType GetType() {return this->m_creatureType;}
     void move() override;
     void draw() const override;
+
+    int getPlayerX();
+    int getPlayerY();
+    int getPlayerDirection(); // Returns -1 if the player is to the left of the creature, 1 if the player is to the right, and 0 if their x matches.
 protected:
     AquariumCreatureType m_creatureType;
-
 };
 
 class BiggerFish : public NPCreature {
@@ -97,7 +100,8 @@ public:
 
 class GroundCreature : public NPCreature {
     public:
-        GroundCreature(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite);
+        GroundCreature(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite) 
+        : NPCreature(x, (int)(aquariumHeight * 0.71f), speed, sprite) { }
 };
 
 class Crab : public GroundCreature {
@@ -179,8 +183,8 @@ class AquariumGameScene : public GameScene {
 class Level_0 : public AquariumLevel  {
     public:
         Level_0(int levelNumber, int targetScore): AquariumLevel(levelNumber, targetScore){
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::Crab, 10));
-
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::Crab, 2));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 10));
         };
         std::vector<AquariumCreatureType> Repopulate() override;
 

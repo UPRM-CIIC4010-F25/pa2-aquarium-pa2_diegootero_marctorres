@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "ofMain.h"
 
-
+class PlayerCreature;
 class AwaitFrames {
 public:
 	AwaitFrames(int frames) : m_frames(frames), m_counter(0) {}
@@ -76,6 +76,7 @@ protected:
     float m_collisionRadius = 0.0f;
     int m_value = 0;
     std::shared_ptr<GameSprite> m_sprite;
+    static std::weak_ptr<PlayerCreature> s_player;
 
 public:
     virtual ~Creature() = default;
@@ -100,6 +101,9 @@ public:
     void setBounds(int w, int h);
     void normalize();
     void bounce();
+
+    static void SetPlayer(std::shared_ptr<PlayerCreature> player);
+    static std::shared_ptr<PlayerCreature> GetPlayer();
 };
 
 // GameEvents

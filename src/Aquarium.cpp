@@ -101,14 +101,39 @@ void NPCreature::draw() const {
     }
 }
 
-GroundCreature::GroundCreature(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite) 
-: NPCreature(x, (int)(aquariumHeight * 0.71f), speed, sprite) { }
+int NPCreature::getPlayerX() {
+    auto player = GetPlayer();
+    if (!player) {
+        ofLogError() << "Player not set yet!";
+        return 0;
+    }
+    return player->getX();
+}
+
+int NPCreature::getPlayerY() {
+    auto player = GetPlayer();
+    if (!player) {
+        ofLogError() << "Player not set yet!";
+        return 0;
+    }
+    return player->getY();
+}
+
+int NPCreature::getPlayerDirection() {
+    if (getPlayerX() > getX()) {
+        return 1;
+    }
+    else if (getPlayerX() < getX()) {
+        return -1;
+    }
+    else {
+        return 0;
+    }
+}
 
 Crab::Crab(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite)
 : GroundCreature(x, aquariumHeight, speed, sprite) {
-    m_dx = (rand() % 3 - 1);
-    m_dy = (rand() % 3 - 1);
-    normalize();
+    m_dx = (rand() % 2 == 0) ? 1 : -1;
 
     setCollisionRadius(60);
     m_value = 10;
@@ -116,6 +141,7 @@ Crab::Crab(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite>
 }
 
 void Crab::move() {
+
     m_x += m_dx * m_speed; // Moves at half speed
     if(m_dx < 0 ){
         this->m_sprite->setFlipped(true);

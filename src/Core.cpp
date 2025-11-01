@@ -1,5 +1,6 @@
 #include "Core.h"
 
+std::weak_ptr<PlayerCreature> Creature::s_player;
 
 // Creature Inherited Base Behavior
 void Creature::setBounds(int w, int h) { m_width = w; m_height = h; }
@@ -13,6 +14,14 @@ void Creature::normalize() {
 
 void Creature::bounce() {
     // should implement boundary controls here
+}
+
+void Creature::SetPlayer(std::shared_ptr<PlayerCreature> player) {
+    s_player = player;
+}
+
+std::shared_ptr<PlayerCreature> Creature::GetPlayer() {
+    return s_player.lock(); // safely return a shared_ptr if still valid
 }
 
 
