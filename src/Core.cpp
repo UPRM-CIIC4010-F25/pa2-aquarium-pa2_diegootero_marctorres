@@ -13,7 +13,19 @@ void Creature::normalize() {
 }
 
 void Creature::bounce() {
-    // should implement boundary controls here
+    if (getX() + m_collisionRadius >= m_width) {
+        m_dx = -abs(m_dx);
+    }
+    else if (getX() - m_collisionRadius <= 0) {
+        m_dx = abs(m_dx);
+    }
+
+    if (getY() + m_collisionRadius >= m_height) {
+        m_dy = -abs(m_dy);
+    }
+    else if (getY() - m_collisionRadius <= 0) {
+        m_dy = abs(m_dy);
+    }
 }
 
 void Creature::SetPlayer(std::shared_ptr<PlayerCreature> player) {
