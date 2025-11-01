@@ -25,9 +25,14 @@ void PlayerCreature::setDirection(float dx, float dy) {
 }
 
 void PlayerCreature::move() {
+    this->bounce();
     m_x += m_dx * m_speed;
     m_y += m_dy * m_speed;
-    this->bounce();
+    if(m_dx < 0 ){
+        this->m_sprite->setFlipped(true);
+    }else {
+        this->m_sprite->setFlipped(false);
+    }
 }
 
 void PlayerCreature::reduceDamageDebounce() {
@@ -337,6 +342,15 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
 void AquariumGameScene::Update(){
     std::shared_ptr<GameEvent> event;
 
+    float dx = 0;
+    float dy = 0;
+
+    if(keysDown[OF_KEY_LEFT])  dx -= 1;
+    if(keysDown[OF_KEY_RIGHT]) dx += 1;
+    if(keysDown[OF_KEY_UP])    dy -= 1;
+    if(keysDown[OF_KEY_DOWN])  dy += 1;
+
+    m_player->setDirection(dx, dy);
     this->m_player->update();
 
     if (this->updateControl.tick()) {

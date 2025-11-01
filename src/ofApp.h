@@ -29,7 +29,6 @@ class ofApp : public ofBaseApp{
 		char moveDirection;
 		int DEFAULT_SPEED = 5;
 
-
 		AwaitFrames acuariumUpdate{5};
 
 		ofTrueTypeFont gameOverTitle;

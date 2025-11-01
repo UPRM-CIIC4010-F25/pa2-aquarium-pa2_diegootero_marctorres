@@ -28,7 +28,7 @@ void ofApp::setup(){
     // Lets setup the aquarium
     myAquarium = std::make_shared<Aquarium>(ofGetWindowWidth(), ofGetWindowHeight(), spriteManager);
     player = std::make_shared<PlayerCreature>(ofGetWindowWidth()/2 - 50, ofGetWindowHeight()/2 - 50, DEFAULT_SPEED, this->spriteManager->GetSprite(AquariumCreatureType::NPCreature));
-    player->setDirection(0, 0); // Initially stationary
+
     player->setBounds(ofGetWindowWidth() - 20, ofGetWindowHeight() - 20);
     
     // Add player instance to the static Creature class
@@ -107,28 +107,8 @@ void ofApp::keyPressed(int key){
     }
     if(gameManager->GetActiveSceneName() == GameSceneKindToString(GameSceneKind::AQUARIUM_GAME)){
         auto gameScene = std::static_pointer_cast<AquariumGameScene>(gameManager->GetActiveScene());
-        switch(key){
-            case OF_KEY_UP:
-                gameScene->GetPlayer()->setDirection(gameScene->GetPlayer()->isXDirectionActive()?gameScene->GetPlayer()->getDx():0, -1);
-                break;
-                case OF_KEY_DOWN:
-                gameScene->GetPlayer()->setDirection(gameScene->GetPlayer()->isXDirectionActive()?gameScene->GetPlayer()->getDx():0, 1);
-                break;
-            case OF_KEY_LEFT:
-                gameScene->GetPlayer()->setDirection(-1, gameScene->GetPlayer()->isYDirectionActive()?gameScene->GetPlayer()->getDy():0);
-                gameScene->GetPlayer()->setFlipped(true);
-                break;
-                case OF_KEY_RIGHT:
-                gameScene->GetPlayer()->setDirection(1, gameScene->GetPlayer()->isYDirectionActive()?gameScene->GetPlayer()->getDy():0);
-                gameScene->GetPlayer()->setFlipped(false);
-                break;
-            default:
-                break;
-        }
-    
         
-    
-        gameScene->GetPlayer()->move();
+        gameScene->keysDown[key] = true;
         return;
 
     }
@@ -154,17 +134,8 @@ void ofApp::keyPressed(int key){
 void ofApp::keyReleased(int key){
     if(gameManager->GetActiveSceneName() == GameSceneKindToString(GameSceneKind::AQUARIUM_GAME)){
         auto gameScene = std::static_pointer_cast<AquariumGameScene>(gameManager->GetActiveScene());
-    if( key == OF_KEY_UP || key == OF_KEY_DOWN){
-        gameScene->GetPlayer()->setDirection(gameScene->GetPlayer()->isXDirectionActive()?gameScene->GetPlayer()->getDx():0, 0);
-        gameScene->GetPlayer()->move();
-        return;
-    }
-    
-    if(key == OF_KEY_LEFT || key == OF_KEY_RIGHT){
-        gameScene->GetPlayer()->setDirection(0, gameScene->GetPlayer()->isYDirectionActive()?gameScene->GetPlayer()->getDy():0);
-        gameScene->GetPlayer()->move();
-        return;
-    }
+        
+        gameScene->keysDown[key] = false;
 
     }
 }

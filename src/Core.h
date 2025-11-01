@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include "ofMain.h"
+#include <map>
 
 class PlayerCreature;
 class AwaitFrames {

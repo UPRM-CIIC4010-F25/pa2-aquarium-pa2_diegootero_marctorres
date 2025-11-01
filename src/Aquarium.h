@@ -50,16 +50,15 @@ class PlayerCreature : public Creature {
 public:
 
     PlayerCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite);
+
     void move();
     void draw() const;
     void update();
     void changeSpeed(int speed);
     void setLives(int lives) { m_lives = lives; }
-    void setDirection(float dx, float dy);
-    float isXDirectionActive() { return m_dx != 0; }
-    float isYDirectionActive() {return m_dy != 0; }
     float getDx() { return m_dx; }
     float getDy() { return m_dy; }
+    void setDirection(float dx, float dy);
 
     int getScore()const { return m_score; }
     int getLives() const { return m_lives; }
@@ -170,6 +169,9 @@ class AquariumGameScene : public GameScene {
         string GetName()override {return this->m_name;}
         void Update() override;
         void Draw() override;
+
+        std::map<int, bool> keysDown;
+        
     private:
         void paintAquariumHUD();
         std::shared_ptr<PlayerCreature> m_player;

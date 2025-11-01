@@ -16,14 +16,14 @@ void Creature::bounce() {
     if (getX() + m_collisionRadius >= m_width) {
         m_dx = -abs(m_dx);
     }
-    else if (getX() - m_collisionRadius <= 0) {
+    else if (getX() + m_collisionRadius <= 0) {
         m_dx = abs(m_dx);
     }
 
     if (getY() + m_collisionRadius >= m_height) {
         m_dy = -abs(m_dy);
     }
-    else if (getY() - m_collisionRadius <= 0) {
+    else if (getY() + m_collisionRadius <= 0) {
         m_dy = abs(m_dy);
     }
 }
