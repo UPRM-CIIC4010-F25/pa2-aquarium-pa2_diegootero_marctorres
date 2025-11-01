@@ -9,7 +9,9 @@
 
 enum class AquariumCreatureType {
     NPCreature,
-    BiggerFish
+    BiggerFish,
+    Predator,
+    Crab
 };
 
 string AquariumCreatureTypeToString(AquariumCreatureType t);
@@ -93,6 +95,18 @@ public:
     void draw() const override;
 };
 
+class GroundCreature : public NPCreature {
+    public:
+        GroundCreature(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite);
+};
+
+class Crab : public GroundCreature {
+    public:
+        Crab(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite);
+        void move() override;
+        void jump();
+        void draw() const override;
+};
 
 class AquariumSpriteManager {
     public:
@@ -102,6 +116,7 @@ class AquariumSpriteManager {
     private:
         std::shared_ptr<GameSprite> m_npc_fish;
         std::shared_ptr<GameSprite> m_big_fish;
+        std::shared_ptr<GameSprite> m_crab_fish;
 };
 
 
@@ -164,7 +179,7 @@ class AquariumGameScene : public GameScene {
 class Level_0 : public AquariumLevel  {
     public:
         Level_0(int levelNumber, int targetScore): AquariumLevel(levelNumber, targetScore){
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 10));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::Crab, 10));
 
         };
         std::vector<AquariumCreatureType> Repopulate() override;
