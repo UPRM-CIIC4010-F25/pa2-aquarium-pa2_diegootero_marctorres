@@ -145,7 +145,7 @@ Crab::Crab(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite>
     m_dx = (rand() % 2 == 0) ? 1 : -1;
 
     setCollisionRadius(60);
-    m_value = 10;
+    m_value = 5;
     m_creatureType = AquariumCreatureType::Crab;
 }
 
