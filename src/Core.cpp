@@ -36,7 +36,6 @@ std::shared_ptr<PlayerCreature> Creature::GetPlayer() {
     return s_player.lock(); // safely return a shared_ptr if still valid
 }
 
-
 void GameEvent::print() const {
         
         switch (type) {

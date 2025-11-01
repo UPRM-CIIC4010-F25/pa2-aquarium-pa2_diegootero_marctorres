@@ -8,6 +8,10 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
             return "BiggerFish";
         case AquariumCreatureType::NPCreature:
             return "BaseFish";
+        case AquariumCreatureType::Crab:
+            return "Crab";
+        case AquariumCreatureType::Predator:
+            return "Predator";
         default:
             return "UknownFish";
     }
@@ -191,12 +195,112 @@ void BiggerFish::draw() const {
     this->m_sprite->draw(this->m_x, this->m_y);
 }
 
+Predator::Predator(float x, float y, int speed,
+                   std::shared_ptr<GameSprite> headSprite,
+                   std::shared_ptr<GameSprite> bodySprite,
+                   std::shared_ptr<GameSprite> tailSprite,
+                   int segmentCount)
+: NPCreature(x, y, speed, headSprite),
+  m_bodySprite(bodySprite),
+  m_tailSprite(tailSprite)
+{
+    m_segments.resize(segmentCount + 2);
+    for (int i = 0; i < m_segments.size(); ++i) {
+        m_segments[i].position.set(x - i * m_segmentDistance, y);
+    }
+
+    m_dx = (rand() % 3 - 1);
+    m_dy = (rand() % 3 - 1);
+    normalize();
+
+    setCollisionRadius(40);
+    m_value = 10;
+    m_creatureType = AquariumCreatureType::Predator;
+}
+
+void Predator::draw() const {
+    if (!m_sprite || !m_bodySprite || !m_tailSprite) return;
+
+    // HEAD rotation (facing the next segment)
+    if (m_segments.size() >= 2) {
+        float angle = atan2(
+            m_segments[1].position.y - m_segments[0].position.y,
+            m_segments[1].position.x - m_segments[0].position.x
+        );
+        m_sprite->drawRot(m_segments[0].position.x, m_segments[0].position.y, ofRadToDeg(angle) - 90);
+    }
+
+    // BODY segments
+    for (size_t i = 1; i + 1 < m_segments.size(); ++i) {
+        float angle = atan2(
+            m_segments[i + 1].position.y - m_segments[i].position.y,
+            m_segments[i + 1].position.x - m_segments[i].position.x
+        );
+        m_bodySprite->drawRot(m_segments[i].position.x, m_segments[i].position.y, ofRadToDeg(angle) - 90);
+    }
+
+    // TAIL rotation (facing previous segment)
+    if (m_segments.size() >= 2) {
+        size_t last = m_segments.size() - 1;
+        float angle = atan2(
+            m_segments[last - 1].position.y - m_segments[last].position.y,
+            m_segments[last - 1].position.x - m_segments[last].position.x
+        );
+        m_tailSprite->drawRot(m_segments[last].position.x, m_segments[last].position.y, ofRadToDeg(angle) + 90);
+    }
+}
+
+void Predator::move() {
+
+    ofVec2f playerPos(getPlayerX(), getPlayerY());
+    ofVec2f headPos = m_segments[0].position;
+
+    // direction to player
+    ofVec2f dir = playerPos - headPos;
+    float len = dir.length();
+    if (len > 0.0001f) dir.normalize();
+
+    // add a subtle sine-wave wobble (so it "curls")
+    float t = ofGetElapsedTimef();
+    float angleOffset = sin(t * 4.0f) * 0.5f; // tune freq & magnitude
+    float c = cos(angleOffset);
+    float s = sin(angleOffset);
+    ofVec2f rotatedDir(dir.x * c - dir.y * s,
+                       dir.x * s + dir.y * c);
+
+    // move head toward player
+    float headSpeed = std::max(0.0f, static_cast<float>(m_speed) * 2); // tune multiplier
+    m_segments[0].position += rotatedDir * headSpeed;
+
+    // each segment follows the previous one, maintaining segment distance
+    for (size_t i = 1; i < m_segments.size(); ++i) {
+        ofVec2f delta = m_segments[i - 1].position - m_segments[i].position;
+        float dist = delta.length();
+        if (dist > 0.0001f) {
+            delta.normalize();
+            // move so the gap becomes segmentDistance (smooth trailing)
+            m_segments[i].position += delta * (dist - m_segmentDistance);
+        }
+    }
+
+    // sync base Creature position with head for collisions/logic
+    this->m_x = m_segments[0].position.x;
+    this->m_y = m_segments[0].position.y;
+
+    // Optionally update sprite flip based on movement direction:
+    if (rotatedDir.x < 0) this->m_sprite->setFlipped(true);
+    else this->m_sprite->setFlipped(false);
+}
+
 
 // AquariumSpriteManager
 AquariumSpriteManager::AquariumSpriteManager(){
     this->m_npc_fish = std::make_shared<GameSprite>("base-fish.png", 70,70);
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
     this->m_crab_fish = std::make_shared<GameSprite>("crab.png", 50, 50);
+    this->m_predator_head = std::make_shared<GameSprite>("predator-head.png", 50, 50);
+    this->m_predator_body = std::make_shared<GameSprite>("predator-body.png", 50, 50);
+    this->m_predator_tail = std::make_shared<GameSprite>("predator-tail.png", 50, 50);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
@@ -208,6 +312,12 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
             return std::make_shared<GameSprite>(*this->m_npc_fish);
         case AquariumCreatureType::Crab:
             return std::make_shared<GameSprite>(*this->m_crab_fish);
+        case AquariumCreatureType::Predator:
+            return std::make_shared<GameSprite>(*this->m_predator_head);
+        case AquariumCreatureType::PredatorBody:
+            return std::make_shared<GameSprite>(*this->m_predator_body);
+        case AquariumCreatureType::PredatorTail:
+            return std::make_shared<GameSprite>(*this->m_predator_tail);
         default:
             return nullptr;
     }
@@ -284,6 +394,10 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             break;
         case AquariumCreatureType::Crab:
             this->addCreature(std::make_shared<Crab>(x, this->getHeight(), speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Crab)));
+        case AquariumCreatureType::Predator:
+            this->addCreature(std::make_shared<Predator>(x, 0, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Predator),
+                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorBody),
+                                                        this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorTail)));
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
@@ -332,6 +446,18 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
         std::shared_ptr<Creature> npc = aquarium->getCreatureAt(i);
         if (npc && checkCollision(player, npc)) {
             return std::make_shared<GameEvent>(GameEventType::COLLISION, player, npc);
+        }
+        if (auto predator = std::dynamic_pointer_cast<Predator>(npc)) {
+            std::vector<Predator::Segment> segments = predator->getSegments();
+            for (size_t s = 0; s < segments.size(); ++s) {
+                float dx = segments[s].position.x - player->getX();
+                float dy = segments[s].position.y - player->getY();
+                float distanceSq = dx * dx + dy * dy;
+                float collisionRadius = (s == 0) ? 20.0f : (s == segments.size() - 1) ? 15.0f : 12.0f;
+                if (distanceSq < collisionRadius * collisionRadius) {
+                    return std::make_shared<GameEvent>(GameEventType::COLLISION, player, predator);
+                }
+            }
         }
     }
     return nullptr;

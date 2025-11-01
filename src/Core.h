@@ -42,6 +42,26 @@ public:
         }
     }
 
+    void drawRot(float x, float y, float rotationDeg = 0.0f) const {
+        ofPushMatrix();
+        // Move to position
+        ofTranslate(x, y);
+        // Apply rotation
+        ofRotateDeg(rotationDeg);
+        
+        // Center the sprite before drawing (rotate around center)
+        float w = m_image.getWidth();
+        float h = m_image.getHeight();
+
+        if (m_flipped) {
+            m_flippedImage.draw(-w / 2, -h / 2);
+        } else {
+            m_image.draw(-w / 2, -h / 2);
+        }
+
+        ofPopMatrix();
+    }
+
     void setFlipped(bool flipped) { m_flipped = flipped; }
 
 private:
