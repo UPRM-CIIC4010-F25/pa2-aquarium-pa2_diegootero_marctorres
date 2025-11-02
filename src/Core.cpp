@@ -26,6 +26,8 @@ void Creature::bounce() {
     else if (getY() + m_collisionRadius <= 0) {
         m_dy = abs(m_dy);
     }
+
+    normalize();
 }
 
 void Creature::SetPlayer(std::shared_ptr<PlayerCreature> player) {
