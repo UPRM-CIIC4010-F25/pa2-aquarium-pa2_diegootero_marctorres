@@ -14,7 +14,8 @@ enum class AquariumCreatureType {
     Predator,
     PredatorBody,
     PredatorTail,
-    Crab
+    Crab,
+    SpeedPowerUp
 };
 
 enum class PlayerType {
@@ -78,12 +79,15 @@ public:
     void loseLife(int debounce);
     void increasePower(int value) { m_power += value; }
     void reduceDamageDebounce();
+    void applySpeedBoost(float factor, int durationFrames);
     
 private:
     int m_score = 0;
     int m_lives = 3;
     int m_power = 1; // mark current power lvl
     int m_damage_debounce = 0; // frames to wait after eating
+    int m_base_speed_backup = 0;
+    int m_speed_boost_frames_left = 0;
 };
 
 class NPCreature : public Creature {
@@ -118,6 +122,29 @@ class Crab : public GroundCreature {
         Crab(float x, float aquariumHeight, int speed, std::shared_ptr<GameSprite> sprite);
         void move() override;
         void draw() const override;
+};
+
+class SpeedPowerUp : public Creature {
+public:
+    SpeedPowerUp(float x, float y)
+    : Creature(x, y, /*speed*/ 0, /*collisionRadius*/ 14.0f, /*value*/ 0, nullptr) {}
+
+    void move() override {
+        // Gentle bob so it's not perfectly static
+        m_y += std::sin(ofGetElapsedTimef() * 2.f) * 0.25f;
+        this->bounce(); // Keep inside bounds just in case
+    }
+
+    void draw() const override {
+        // Bright yellow orb with white outline
+        ofPushStyle();
+        ofSetColor(255, 255, 0);
+        ofDrawCircle(m_x, m_y, 10);
+        ofNoFill();
+        ofSetColor(255);
+        ofDrawCircle(m_x, m_y, 12);
+        ofPopStyle();
+    }
 };
 
 class Predator : public NPCreature {
@@ -189,6 +216,7 @@ private:
     int m_width;
     int m_height;
     int currentLevel = 0;
+    int m_powerupCooldownFrames = 0;
     std::vector<std::shared_ptr<Creature>> m_creatures;
     std::vector<std::shared_ptr<Creature>> m_next_creatures;
     std::vector<std::shared_ptr<AquariumLevel>> m_aquariumlevels;

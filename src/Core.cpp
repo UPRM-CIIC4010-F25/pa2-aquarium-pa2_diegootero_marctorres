@@ -62,6 +62,8 @@ void GameEvent::print() const {
                 break;
             case GameEventType::NEW_LEVEL:
                 ofLogVerbose() << "New Game level" << std::endl;
+            case GameEventType::POWER_UP:
+                ofLogVerbose() << "Creature powered up" << std::endl;
             default:
                 ofLogVerbose() << "Unknown event type." << std::endl;
                 break;

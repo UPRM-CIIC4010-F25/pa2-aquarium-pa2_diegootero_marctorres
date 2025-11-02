@@ -136,6 +136,7 @@ enum class GameEventType {
     GAME_OVER,
     GAME_EXIT,
     NEW_LEVEL,
+    POWER_UP
 };
 
 class GameEvent {

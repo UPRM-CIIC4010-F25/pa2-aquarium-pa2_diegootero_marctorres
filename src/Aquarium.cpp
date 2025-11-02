@@ -19,7 +19,9 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
 
 // PlayerCreature Implementation
 PlayerCreature::PlayerCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
-: Creature(x, y, speed, 10.0f, 1, sprite) {}
+: Creature(x, y, speed, 10.0f, 1, sprite) {
+    m_base_speed_backup = speed; // We need a copy of the original speed value
+}
 
 
 void PlayerCreature::setDirection(float dx, float dy) {
@@ -47,6 +49,16 @@ void PlayerCreature::reduceDamageDebounce() {
 
 void PlayerCreature::update() {
     this->reduceDamageDebounce();
+
+    // Handling speed boost timer
+    if (m_speed_boost_frames_left > 0) {
+        --m_speed_boost_frames_left;
+        if (m_speed_boost_frames_left == 0) {
+            // If the m_base_speed_backup is greater than 0, use m_base_speed_backup. Otherwise just use m_speed.
+            m_speed = (m_base_speed_backup > 0) ? m_base_speed_backup : m_speed;
+        }
+    }
+
     this->move();
 }
 
@@ -80,6 +92,12 @@ void PlayerCreature::loseLife(int debounce) {
     if (m_damage_debounce > 0) {
         ofLogVerbose() << "Player is in damage debounce period. Frames left: " << m_damage_debounce << std::endl;
     }
+}
+
+void PlayerCreature::applySpeedBoost(float factor, int durationFrames) {
+    if (m_base_speed_backup == 0) m_base_speed_backup = m_speed; // We'll store the original speed values here
+    m_speed = std::max(1, int(std::round(m_base_speed_backup * factor)));
+    m_speed_boost_frames_left = durationFrames;
 }
 
 // NPCreature Implementation
@@ -361,6 +379,19 @@ void Aquarium::update() {
     for (auto& creature : m_creatures) {
         creature->move();
     }
+
+    // Power-up spawn logic, once every 10s at most, with a small chance each second
+    if (m_powerupCooldownFrames > 0) {
+        --m_powerupCooldownFrames;
+    } else {
+        // 1% chance per frame at 60fps would be too frequent; do smaller.
+        // Try 0.2% per frame (once every 8s on average) but only when cooldown is 0.
+        if (ofRandom(0.0f, 1.0f) < 0.002f) {
+            this->SpawnCreature(AquariumCreatureType::SpeedPowerUp);
+            m_powerupCooldownFrames = 10 * 60; // 10 seconds cooldown
+        }
+    }
+
     this->Repopulate();
 }
 
@@ -375,9 +406,13 @@ void Aquarium::removeCreature(std::shared_ptr<Creature> creature) {
     auto it = std::find(m_creatures.begin(), m_creatures.end(), creature);
     if (it != m_creatures.end()) {
         ofLogVerbose() << "removing creature " << endl;
-        int selectLvl = this->currentLevel % this->m_aquariumlevels.size();
-        auto npcCreature = std::static_pointer_cast<NPCreature>(creature);
-        this->m_aquariumlevels.at(selectLvl)->ConsumePopulation(npcCreature->GetType(), npcCreature->getValue());
+
+        // Only consume population if this is an NPC-style creature that contributes to levels
+        if (auto npc = std::dynamic_pointer_cast<NPCreature>(creature)) {
+            int selectLvl = this->currentLevel % this->m_aquariumlevels.size();
+            this->m_aquariumlevels.at(selectLvl)->ConsumePopulation(npc->GetType(), npc->getValue());
+        }
+
         m_creatures.erase(it);
     }
 }
@@ -421,7 +456,15 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             this->addCreature(std::make_shared<Predator>(x, 0, babyPredatorSpeed, this->m_sprite_manager->GetSprite(AquariumCreatureType::Predator),
                                                         this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorBody),
                                                         this->m_sprite_manager->GetSprite(AquariumCreatureType::PredatorTail), 4));
-            break;                                             
+            break;
+        case AquariumCreatureType::SpeedPowerUp: {
+            int x = rand() % this->getWidth();
+            int y = rand() % this->getHeight();
+            auto pu = std::make_shared<SpeedPowerUp>(x, y);
+            pu->setBounds(this->getWidth(), this->getHeight());
+            this->addCreature(pu);
+            break;
+        }                                             
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
@@ -468,6 +511,23 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
     
     for (int i = 0; i < aquarium->getCreatureCount(); ++i) {
         std::shared_ptr<Creature> npc = aquarium->getCreatureAt(i);
+
+        // Power-up collision (handle early and continue)
+        // Collision detection is so weird... -Diego
+        if (auto pu = std::dynamic_pointer_cast<SpeedPowerUp>(npc)) {
+            float dx = pu->getX() - player->getX();
+            float dy = pu->getY() - player->getY();
+            float distSq = dx*dx + dy*dy;
+            float rr = (pu->getCollisionRadius() + player->getCollisionRadius());
+            if (distSq < rr * rr) {
+                // Apply 2x speed for 5 seconds
+                player->applySpeedBoost(/*factor*/ 2.0f, /*durationFrames*/ 5 * 60);
+                aquarium->removeCreature(pu);
+                return std::make_shared<GameEvent>(GameEventType::POWER_UP, player, nullptr);
+            }
+            continue; // Done evaluating this entry
+        }
+
         if (auto predator = std::dynamic_pointer_cast<Predator>(npc)) {
             std::vector<Predator::Segment> segments = predator->getSegments();
             for (size_t s = 0; s < segments.size(); ++s) {
