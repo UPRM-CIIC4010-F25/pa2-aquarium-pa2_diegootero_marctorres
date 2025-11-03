@@ -25,7 +25,7 @@ Grading
 | Student Number | Student Name | Student Email |
 |-|-|-|
 |(802-21-3328)| (Diego A. Otero Padilla)| (diego.otero2@upr.edu) |
-|(STUDENT NUMBER HERE)| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
+|(802-25-9753)| (Marc Torres Ramirez)| (marc.torres@upr.edu) |
 
 ---
 
@@ -37,3 +37,9 @@ If a partner has no commits in the repositories, they will receive a 0.
 
 # Student Notes
 If you have any bonus specs, bonus or any details the TA's should know, you should include it here:
+
+Pirahna Player can only eat the small blue fish.
+Shark Player can eat the big fish and the crabs, but NOT the predator worm.
+Eldritch Player can eat anything, including the worms.
+
+Running the program, we did struggle using Build Task. If it does not work for you, click the bar on the top of your VSCode and press Run Task -> Build and Run Debug. Should work at that point.
